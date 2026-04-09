@@ -1,3 +1,4 @@
+# Módulo de cifragem/decifragem ChaCha20-Poly1305
 import os
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 

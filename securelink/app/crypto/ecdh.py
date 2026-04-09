@@ -1,3 +1,4 @@
+# Módulo de troca de chaves ECDH
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives import serialization
 
