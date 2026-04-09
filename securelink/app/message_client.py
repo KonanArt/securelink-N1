@@ -4,6 +4,7 @@ from crypto.kdf import derive_key
 from crypto.chacha20 import encrypt
 
 HOST = 'server'  # nome do container no docker
+#HOST = '127.0.0.1' para testes sem o docker
 PORT = 5000
 
 client = socket.socket()
