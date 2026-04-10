@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  ca:
+    build: ./ca
+    container_name: ca
+    volumes:
+      - certs:/certs
+      - ./ca/data:/ca/data
+    command: bash -c "/ca/scripts/init_ca.sh"
+
+  server:
+    build: ./server
+    container_name: server
+    depends_on:
+      - ca
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    volumes:
+      - certs:/certs
+      - ./ca/data:/ca/data
+    ports:
+      - "1194:1194/udp"
+
+  cliente_norte:
+    build: ./client
+    container_name: cliente_norte
+    depends_on:
+      - server
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    environment:
+      - SERVER_HOST=server
+    volumes:
+      - certs:/certs
+      - ./ca/data:/ca/data
+
+  cliente_sul:
+    build: ./client
+    container_name: cliente_sul
+    depends_on:
+      - server
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    environment:
+      - SERVER_HOST=server
+    volumes:
+      - certs:/certs
+      - ./ca/data:/ca/data
+
+  app:
+    build: ./app
+    container_name: app
+    depends_on:
+      - cliente_norte
+    networks:
+      - default
+
+volumes:
+  certs:
