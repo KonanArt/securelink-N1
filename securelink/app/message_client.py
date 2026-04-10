@@ -3,34 +3,33 @@ from crypto.ecdh import *
 from crypto.kdf import derive_key
 from crypto.chacha20 import encrypt
 
-HOST = 'server'  # nome do container no docker
-#HOST = '127.0.0.1' para testes sem o docker
+HOST = 'server'
 PORT = 5000
 
 client = socket.socket()
 client.connect((HOST, PORT))
 
-# ECDH
 priv, pub = generate_keypair()
 
-# envia chave pública
-client.send(serialize_public_key(pub))
+client.sendall(serialize_public_key(pub))
 
-# recebe chave servidor
 server_pub_bytes = client.recv(1024)
 server_pub = load_public_key(server_pub_bytes)
 
-# segredo compartilhado
 shared = compute_shared_secret(priv, server_pub)
 key = derive_key(shared)
 
-# mensagem
 msg = b"Mensagem secreta da filial norte"
+aad = b"cliente_norte"
 
-nonce, ciphertext = encrypt(key, msg)
+nonce, ciphertext = encrypt(key, msg, aad)
 
-client.send(nonce)
-client.send(ciphertext)
+print("Chave pública cliente:", serialize_public_key(pub))
+print("Nonce:", nonce)
+print("Ciphertext:", ciphertext)
+
+data = aad + b'||' + nonce + ciphertext
+client.sendall(len(data).to_bytes(4, 'big') + data)
 
 print("Mensagem enviada!")
 
